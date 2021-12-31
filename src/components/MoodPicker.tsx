@@ -11,8 +11,19 @@ const moodOptions: MoodOptionType[] = [
   { emoji: '😤', description: 'frustrated' },
 ];
 
-export const MoodPicker: React.FC = () => {
+interface Props {
+  onSelect: (mood: MoodOptionType) => void;
+}
+
+export const MoodPicker: React.FC<Props> = ({ onSelect }) => {
   const [selectedMood, setSelectedMood] = React.useState<MoodOptionType>();
+
+  const handleMoodSelected = React.useCallback(() => {
+    if (selectedMood) {
+      onSelect(selectedMood);
+      setSelectedMood(undefined);
+    }
+  }, [selectedMood, onSelect]);
 
   return (
     <View style={styles.container}>
@@ -34,7 +45,7 @@ export const MoodPicker: React.FC = () => {
           </View>
         ))}
       </View>
-      <Pressable style={styles.buttonWrapper}>
+      <Pressable style={styles.buttonWrapper} onPress={handleMoodSelected}>
         <Text style={styles.buttonText}>Choose</Text>
       </Pressable>
     </View>
