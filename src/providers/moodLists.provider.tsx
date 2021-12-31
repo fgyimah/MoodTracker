@@ -11,8 +11,9 @@ const defaultValue: MoodListContextType = {
   handleSelectMood: () => {},
 };
 
-export const MoodListContext =
-  React.createContext<MoodListContextType>(defaultValue);
+const MoodListContext = React.createContext<MoodListContextType>(defaultValue);
+
+export const useMoodListContext = () => React.useContext(MoodListContext);
 
 export const MoodListProvider: React.FC = ({ children }) => {
   const [moodList, setMoodList] = React.useState<MoodOptionWithTimestamp[]>([]);

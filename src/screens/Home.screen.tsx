@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { MoodPicker } from '../components/MoodPicker';
-import { MoodListContext } from '../providers/moodLists.provider';
+import { useMoodListContext } from '../providers/moodLists.provider';
 
 export const Home: React.FC = () => {
-  const { handleSelectMood } = React.useContext(MoodListContext);
+  const { handleSelectMood } = useMoodListContext();
 
   return (
     <View style={styles.container}>
