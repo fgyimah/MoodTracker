@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: theme.colorWhite,
     flexDirection: 'row',
-    marginBottom: 10,
+    marginBottom: 20,
     paddingVertical: 20,
     paddingHorizontal: 10,
     justifyContent: 'space-between',
