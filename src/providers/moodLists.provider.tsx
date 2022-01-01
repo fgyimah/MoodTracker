@@ -7,11 +7,13 @@ const MOOD_LIST_KEY = 'mood-list-key';
 interface MoodListContextType {
   moodList: MoodOptionWithTimestamp[];
   handleSelectMood: (mood: MoodOptionType) => void;
+  handleDeleteMood: (mood: MoodOptionWithTimestamp) => void;
 }
 
 const defaultValue: MoodListContextType = {
   moodList: [],
   handleSelectMood: () => {},
+  handleDeleteMood: () => {},
 };
 
 const MoodListContext = React.createContext<MoodListContextType>(defaultValue);
@@ -69,8 +71,23 @@ export const MoodListProvider: React.FC = ({ children }) => {
     });
   }, []);
 
+  const handleDeleteMood = React.useCallback(
+    (mood: MoodOptionWithTimestamp) => {
+      setMoodList(current => {
+        const updatedMoods = current.filter(
+          item => mood.timestamp !== item.timestamp,
+        );
+        saveMoods(updatedMoods);
+
+        return updatedMoods;
+      });
+    },
+    [],
+  );
+
   return (
-    <MoodListContext.Provider value={{ moodList, handleSelectMood }}>
+    <MoodListContext.Provider
+      value={{ moodList, handleSelectMood, handleDeleteMood }}>
       {children}
     </MoodListContext.Provider>
   );

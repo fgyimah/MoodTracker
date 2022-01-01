@@ -27,7 +27,7 @@ export const MoodPicker: React.FC<Props> = ({ onSelect }) => {
       setHasSelected(true);
       Toast.show({
         type: 'success',
-        text1: 'Mood saved',
+        text1: `${selectedMood.emoji} mood saved`,
       });
     }
   }, [selectedMood, onSelect]);
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 230,
+    height: 250,
   },
   moodOptions: {
     flexDirection: 'row',
@@ -109,12 +109,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 12,
     textAlign: 'center',
+    fontFamily: theme.fontFamilyLight,
   },
   title: {
     fontWeight: 'bold',
     fontSize: 24,
     marginVertical: 5,
     textAlign: 'center',
+    color: theme.colorWhite,
+    fontFamily: theme.fontFamilyRegular,
   },
   buttonWrapper: {
     padding: 10,
@@ -129,5 +132,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     fontSize: 16,
+    fontFamily: theme.fontFamilyLight,
   },
 });
