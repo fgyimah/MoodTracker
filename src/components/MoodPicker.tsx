@@ -1,6 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View, Pressable, Image } from 'react-native';
 import Toast from 'react-native-toast-message';
+import Reanimated, {
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
 import { theme } from '../theme';
 import { MoodOptionType } from '../types';
 
@@ -12,6 +16,8 @@ const moodOptions: MoodOptionType[] = [
   { emoji: '😤', description: 'frustrated' },
 ];
 
+const ReanimatedPressable = Reanimated.createAnimatedComponent(Pressable);
+
 interface Props {
   onSelect: (mood: MoodOptionType) => void;
 }
@@ -19,6 +25,14 @@ interface Props {
 export const MoodPicker: React.FC<Props> = ({ onSelect }) => {
   const [selectedMood, setSelectedMood] = React.useState<MoodOptionType>();
   const [hasSelected, setHasSelected] = React.useState(false);
+
+  const buttonStyle = useAnimatedStyle(
+    () => ({
+      opacity: selectedMood ? withTiming(1) : withTiming(0.5),
+      transform: [{ scale: selectedMood ? withTiming(1) : 0.8 }],
+    }),
+    [selectedMood],
+  );
 
   const handleMoodSelected = React.useCallback(() => {
     if (selectedMood) {
@@ -65,9 +79,11 @@ export const MoodPicker: React.FC<Props> = ({ onSelect }) => {
               </View>
             ))}
           </View>
-          <Pressable style={styles.buttonWrapper} onPress={handleMoodSelected}>
+          <ReanimatedPressable
+            style={[styles.buttonWrapper, buttonStyle]}
+            onPress={handleMoodSelected}>
             <Text style={styles.buttonText}>Choose</Text>
-          </Pressable>
+          </ReanimatedPressable>
         </>
       )}
     </View>
