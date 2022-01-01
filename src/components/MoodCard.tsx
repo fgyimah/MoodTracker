@@ -8,6 +8,14 @@ import {
   UIManager,
   Platform,
 } from 'react-native';
+import Reanimated, {
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  runOnJS,
+} from 'react-native-reanimated';
+import { PanGestureHandler } from 'react-native-gesture-handler';
 import { format } from 'date-fns';
 import { MoodOptionWithTimestamp } from '../types';
 import { theme } from '../theme';
@@ -15,6 +23,10 @@ import { useMoodListContext } from '../providers/moodLists.provider';
 
 interface Props {
   moodItem: MoodOptionWithTimestamp;
+}
+
+interface AnimatedContext {
+  shouldBeRemoved?: boolean;
 }
 
 // enable experimental UI animations in android
@@ -27,27 +39,71 @@ if (Platform.OS === 'android') {
 export const MoodCard: React.FC<Props> = ({ moodItem }) => {
   const { timestamp, mood } = moodItem;
   const { handleDeleteMood } = useMoodListContext();
+  const offset = useSharedValue(0);
+  const MAX_PAN = 80;
 
   const handleDeletePress = React.useCallback(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     handleDeleteMood(moodItem);
   }, [handleDeleteMood, moodItem]);
 
+  const removeWithDelay = React.useCallback(() => {
+    setTimeout(() => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      handleDeleteMood(moodItem);
+    }, 250);
+  }, [handleDeleteMood, moodItem]);
+
+  const onGestureEvent = useAnimatedGestureHandler(
+    {
+      onActive: (event, ctx: AnimatedContext) => {
+        const xVal = Math.floor(event.translationX);
+        offset.value = xVal;
+
+        if (Math.abs(xVal) <= MAX_PAN) {
+          ctx.shouldBeRemoved = false;
+        } else {
+          ctx.shouldBeRemoved = true;
+        }
+      },
+      onEnd: (_, ctx: AnimatedContext) => {
+        if (ctx.shouldBeRemoved) {
+          runOnJS(removeWithDelay)();
+        } else {
+          offset.value = withTiming(0);
+        }
+      },
+    },
+    [],
+  );
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: offset.value }],
+  }));
+
   return (
-    <View key={timestamp} style={styles.container}>
-      <View style={styles.emojiAndDescriptionContainer}>
-        <Text style={styles.emoji}>{mood.emoji}</Text>
-        <Text style={styles.description}>{mood.description}</Text>
-      </View>
-      <Text style={styles.datetime}>
-        {format(timestamp, "dd MMM, yyyy 'at' h:mmaaa")}
-      </Text>
-      <Pressable hitSlop={16}>
-        <Text style={styles.deleteText} onPress={handleDeletePress}>
-          Delete
+    <PanGestureHandler
+      // @ts-ignore
+      minDeltaX={1}
+      maxDeltaY={100}
+      onGestureEvent={onGestureEvent}>
+      <Reanimated.View
+        key={timestamp}
+        style={[styles.container, animatedStyle]}>
+        <View style={styles.emojiAndDescriptionContainer}>
+          <Text style={styles.emoji}>{mood.emoji}</Text>
+          <Text style={styles.description}>{mood.description}</Text>
+        </View>
+        <Text style={styles.datetime}>
+          {format(timestamp, "dd MMM, yyyy 'at' h:mmaaa")}
         </Text>
-      </Pressable>
-    </View>
+        <Pressable hitSlop={16}>
+          <Text style={styles.deleteText} onPress={handleDeletePress}>
+            Delete
+          </Text>
+        </Pressable>
+      </Reanimated.View>
+    </PanGestureHandler>
   );
 };
 
